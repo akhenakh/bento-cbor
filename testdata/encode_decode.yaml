@@ -1,0 +1,26 @@
+input:
+  generate:
+    count: 1
+    interval: 1ms
+    mapping: |
+      root = {
+        "message": "Hello CBOR World",
+        "numbers": [1, 2, 3, 4, 5],
+        "nested": {
+          "boolean": true,
+          "null_value": null
+        },
+        "m": { "c": 3, "a": 1, "b": 2,}
+      }
+
+pipeline:
+  processors:
+    - cbor:
+        operator: from_json
+    - cbor:
+        operator: to_json
+output:
+  stdout: {}
+
+logger:
+  level: info
