@@ -12,15 +12,6 @@ CBOR is a binary data format designed for small message size with the ability to
 
 Download a pre-built binary from the releases page.
 
-### Building from Source
-
-Clone the repository and build the custom Bento binary:
-
-```bash
-git clone https://github.com/akhenakh/bento-cbor.git
-cd bento-cbor
-go build ./cmd/bento-cbor
-```
 
 ## Usage
 
@@ -84,6 +75,15 @@ logger:
 ```
 
 ## Build
+
+Clone the repository and build the custom Bento binary:
+
+```bash
+git clone https://github.com/akhenakh/bento-cbor.git
+cd bento-cbor
+go build ./cmd/bento-cbor
+```
+
 You can build your own binary, just load the plugin:
 
 ```go
