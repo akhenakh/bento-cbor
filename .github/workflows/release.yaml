@@ -20,14 +20,10 @@ jobs:
         uses: actions/setup-go@v5
 
       - uses: ko-build/setup-ko@v0.8
-
-      - name: Generate and upload release.yaml
+      - name: ko build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          tag=$(echo ${{ github.ref }} | cut -c11-)  # get tag name without tags/refs/ prefix.
-          ko resolve -t ${tag} -f config/ > release.yaml
-          gh release upload ${tag} release.yaml
+        run: ko build ./cmd/bento-cbor
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
