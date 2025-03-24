@@ -83,6 +83,27 @@ logger:
   level: info
 ```
 
+## Build
+You can build your own binary, just load the plugin:
+
+```go
+package main
+
+import (
+	"context"
+
+	"github.com/warpstreamlabs/bento/public/service"
+
+	// Import all standard Benthos components
+	_ "github.com/warpstreamlabs/bento/public/components/all"
+
+	_ "github.com/akhenakh/bento-cbor"
+)
+
+func main() {
+	service.RunCLI(context.Background())
+}
+```
 
 ## Technical Details
 
