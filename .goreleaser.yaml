@@ -5,8 +5,8 @@ before:
     - go mod tidy
 
 builds:
-  main: ./cmd/bento-cbor
-  - env:
+  - main: ./cmd/bento-cbor
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
