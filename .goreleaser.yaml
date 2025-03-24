@@ -5,6 +5,7 @@ before:
     - go mod tidy
 
 builds:
+  main: ./cmd/bento-cbor
   - env:
       - CGO_ENABLED=0
     goos:
@@ -13,7 +14,7 @@ builds:
       - darwin
 
 archives:
-  - format: tar.gz
+  - formats: ['tar.gz']
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
@@ -25,7 +26,7 @@ archives:
     # use zip for windows archives
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ['zip']
 
 changelog:
   sort: asc
