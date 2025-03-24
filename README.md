@@ -1,6 +1,6 @@
 # Bento CBOR Processor
 
-A Bento processor plugin for working with CBOR (Concise Binary Object Representation) data. This processor allows you to convert between JSON and CBOR formats.
+A [Bento](https://warpstreamlabs.github.io/bento/) processor plugin for working with CBOR (Concise Binary Object Representation) data. This processor allows you to convert between JSON and CBOR formats.
 
 ## Overview
 
