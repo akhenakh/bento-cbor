@@ -16,6 +16,3 @@ jobs:
 
       - name: Run tests
         run: go test -v
-
-      - uses: ko-build/setup-ko@v0.8
-      - run: ko build ./cmd/bento-cbor

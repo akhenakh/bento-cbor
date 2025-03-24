@@ -24,3 +24,5 @@ go.work.sum
 # env file
 .env
 cmd/bento-cbor/bento-cbor
+# Added by goreleaser init:
+dist/
