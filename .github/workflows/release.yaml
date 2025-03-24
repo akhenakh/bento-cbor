@@ -21,8 +21,6 @@ jobs:
 
       - uses: ko-build/setup-ko@v0.8
       - name: ko build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ko build ./cmd/bento-cbor
 
       - name: Run GoReleaser
