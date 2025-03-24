@@ -5,10 +5,8 @@ on:
     tags:
       - "*"
 
-
-
 jobs:
-  goreleaser:
+  release:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
@@ -19,17 +17,17 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
 
-      - uses: ko-build/setup-ko@v0.8
-      - name: ko build
-        run: ko build --platform=linux/amd64,linux/arm64 ./cmd/bento-cbor 
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
-          # 'latest', 'nightly', or a semver
-          version: "~> v6"
+          version: '~> v2'
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ko-build/setup-ko@v0.8
+      - name: ko build
+        run: ko build --bare --platform=linux/amd64,linux/arm64 ./cmd/bento-cbor 
+
