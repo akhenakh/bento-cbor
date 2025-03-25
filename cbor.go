@@ -95,7 +95,8 @@ func newCBORToJSONOperator(cp *CBORProcessor) func(msg *service.Message) error {
 	}
 }
 
-// Add this helper function to the test file if needed
+// convertToStringKeyMap recursively converts maps with non-string keys to maps with string keys,
+// handling nested maps and slices by transforming their key and value types.
 func convertToStringKeyMap(data any) any {
 	switch x := data.(type) {
 	case map[interface{}]interface{}:
