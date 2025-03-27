@@ -31,7 +31,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ko-build/setup-ko@v0.8
-      - name: ko build
-        run: ko build --bare --platform=linux/amd64,linux/arm64 ./cmd/bento-cbor 
-
