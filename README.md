@@ -74,6 +74,14 @@ logger:
   level: info
 ```
 
+## Docker
+
+A pre built binary is also availale as a docker image:
+
+```sh
+ docker pull ghcr.io/akhenakh/bento-cbor:latest
+```
+
 ## Build
 
 Clone the repository and build the custom Bento binary:
