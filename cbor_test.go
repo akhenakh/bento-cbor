@@ -4,6 +4,7 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
@@ -159,4 +160,31 @@ func TestCBORFromJson(t *testing.T) {
 			assert.Equal(t, test.expectedOutput, convertedAct)
 		})
 	}
+}
+
+func convertToStringKeyMap(data any) any {
+	switch x := data.(type) {
+	case map[any]any:
+		m := map[string]any{}
+		for k, v := range x {
+			keyStr := fmt.Sprintf("%v", k)
+			m[keyStr] = convertToStringKeyMap(v)
+		}
+		return m
+	case map[string]any:
+		m := map[string]any{}
+		for k, v := range x {
+			m[k] = convertToStringKeyMap(v)
+		}
+		return m
+	case []any:
+		result := make([]any, len(x))
+		for i, v := range x {
+			result[i] = convertToStringKeyMap(v)
+		}
+		return result
+	case []byte:
+		return string(x)
+	}
+	return data
 }

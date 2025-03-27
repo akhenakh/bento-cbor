@@ -1,11 +1,11 @@
 package cbor
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/fxamacker/cbor/v2"
 	"github.com/warpstreamlabs/bento/public/service"
@@ -33,14 +33,25 @@ func NewProcessor(operatorStr string) (*CBORProcessor, error) {
 		return nil, err
 	}
 
-	// Create encoder and decoder modes
-	if p.encMode, err = cbor.EncOptions(cbor.PreferredUnsortedEncOptions()).EncMode(); err != nil {
+	// Configure encoder options for JSON compatibility
+	encOpts := cbor.EncOptions{
+		ByteSliceLaterFormat: cbor.ByteSliceLaterFormatBase64,
+		String:               cbor.StringToByteString,
+		ByteArray:            cbor.ByteArrayToArray,
+	}
+
+	// Create encoder mode
+	if p.encMode, err = encOpts.EncMode(); err != nil {
 		return nil, fmt.Errorf("failed to create CBOR encoder: %w", err)
 	}
 
-	// Create decoder mode with string key maps enabled
+	// Configure decoder options for JSON compatibility
 	decOpts := cbor.DecOptions{
-		MapKeyByteString: cbor.MapKeyByteStringAllowed,
+		MapKeyByteString:      cbor.MapKeyByteStringAllowed,     // Convert byte string map keys to strings
+		DefaultMapType:        reflect.TypeOf(map[string]any{}), // Use string maps by default
+		DefaultByteStringType: reflect.TypeOf(""),               // Convert byte strings to Go strings
+		ByteStringToString:    cbor.ByteStringToStringAllowed,
+		IndefLength:           cbor.IndefLengthAllowed,
 	}
 
 	if p.decMode, err = decOpts.DecMode(); err != nil {
@@ -71,20 +82,14 @@ func newCBORToJSONOperator(cp *CBORProcessor) func(msg *service.Message) error {
 			return fmt.Errorf("failed to get message bytes: %w", err)
 		}
 
-		// Create a new decoder
-		decoder := cp.decMode.NewDecoder(bytes.NewReader(bytesContent))
-
 		// Decode CBOR to a generic interface
 		var decoded any
-		if err := decoder.Decode(&decoded); err != nil {
+		if err := cp.decMode.Unmarshal(bytesContent, &decoded); err != nil {
 			return fmt.Errorf("failed to decode CBOR: %w %s", err, string(bytesContent))
 		}
 
-		// Convert decoded data to map with string keys
-		stringKeyData := convertToStringKeyMap(decoded)
-
 		// Convert to JSON
-		jsonData, err := json.Marshal(stringKeyData)
+		jsonData, err := json.Marshal(decoded)
 		if err != nil {
 			return fmt.Errorf("failed to convert CBOR to JSON: %w", err)
 		}
@@ -93,31 +98,6 @@ func newCBORToJSONOperator(cp *CBORProcessor) func(msg *service.Message) error {
 		msg.SetBytes(jsonData)
 		return nil
 	}
-}
-
-// convertToStringKeyMap recursively converts maps with non-string keys to maps with string keys,
-// handling nested maps and slices by transforming their key and value types.
-func convertToStringKeyMap(data any) any {
-	switch x := data.(type) {
-	case map[interface{}]interface{}:
-		m := map[string]any{}
-		for k, v := range x {
-			keyStr := fmt.Sprintf("%v", k)
-			m[keyStr] = convertToStringKeyMap(v)
-		}
-		return m
-	case map[string]any:
-		m := map[string]any{}
-		for k, v := range x {
-			m[k] = convertToStringKeyMap(v)
-		}
-		return m
-	case []any:
-		for i, v := range x {
-			x[i] = convertToStringKeyMap(v)
-		}
-	}
-	return data
 }
 
 func newCBORFromJSONOperator(cp *CBORProcessor) func(msg *service.Message) error {
