@@ -33,12 +33,13 @@ func NewProcessor(operatorStr string) (*CBORProcessor, error) {
 		return nil, err
 	}
 
-	// Configure encoder options for JSON compatibility
-	encOpts := cbor.EncOptions{
-		ByteSliceLaterFormat: cbor.ByteSliceLaterFormatBase64,
-		String:               cbor.StringToByteString,
-		ByteArray:            cbor.ByteArrayToArray,
-	}
+	// Configure encoder options for JSON compatibility and better data packing.
+	// PreferredUnsortedEncOptions prevents map key sorting for faster serialization,
+	// and shrinks floats and bigints to their shortest possible encoded representations.
+	encOpts := cbor.PreferredUnsortedEncOptions()
+	encOpts.ByteSliceLaterFormat = cbor.ByteSliceLaterFormatBase64
+	encOpts.String = cbor.StringToByteString
+	encOpts.ByteArray = cbor.ByteArrayToArray
 
 	// Create encoder mode
 	if p.encMode, err = encOpts.EncMode(); err != nil {
