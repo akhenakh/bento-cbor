@@ -34,12 +34,13 @@ func NewProcessor(operatorStr string) (*CBORProcessor, error) {
 	}
 
 	// Configure encoder options for JSON compatibility and better data packing.
-	// PreferredUnsortedEncOptions prevents map key sorting for faster serialization,
-	// and shrinks floats and bigints to their shortest possible encoded representations.
 	encOpts := cbor.PreferredUnsortedEncOptions()
 	encOpts.ByteSliceLaterFormat = cbor.ByteSliceLaterFormatBase64
 	encOpts.String = cbor.StringToByteString
 	encOpts.ByteArray = cbor.ByteArrayToArray
+
+	// Leverage v2.9.1+ feature for accurate/clean Time encoding
+	encOpts.Time = cbor.TimeRFC3339NanoUTC
 
 	// Create encoder mode
 	if p.encMode, err = encOpts.EncMode(); err != nil {
@@ -86,17 +87,13 @@ func newCBORToJSONOperator(cp *CBORProcessor) func(msg *service.Message) error {
 		// Decode CBOR to a generic interface
 		var decoded any
 		if err := cp.decMode.Unmarshal(bytesContent, &decoded); err != nil {
-			return fmt.Errorf("failed to decode CBOR: %w %s", err, string(bytesContent))
+			return fmt.Errorf("failed to decode CBOR: %w", err)
 		}
 
-		// Convert to JSON
-		jsonData, err := json.Marshal(decoded)
-		if err != nil {
-			return fmt.Errorf("failed to convert CBOR to JSON: %w", err)
-		}
-
-		// Set the message content
-		msg.SetBytes(jsonData)
+		// Assign structured data back to Bento directly!
+		// Bento will encode to JSON lazily ONLY when required by an output or downstream processor,
+		// avoiding JSON allocations and CPU cycles altogether if an intervening step handles structured mapped queries.
+		msg.SetStructured(decoded)
 		return nil
 	}
 }
@@ -108,7 +105,9 @@ func newCBORFromJSONOperator(cp *CBORProcessor) func(msg *service.Message) error
 			return fmt.Errorf("failed to get message bytes: %w", err)
 		}
 
-		// Parse JSON
+		// Parse JSON directly.
+		// We use standard Unmarshal here over Benthos's AsStructured() to avoid `json.Number`
+		// which isn't mapped to ints/floats out-of-the-box by the CBOR package and encodes as raw strings.
 		var jsonData any
 		if err := json.Unmarshal(bytesContent, &jsonData); err != nil {
 			return fmt.Errorf("failed to parse JSON: %w", err)

@@ -115,11 +115,17 @@ func main() {
 
 ## Technical Details
 
-The processor uses the [fxamacker/cbor](https://github.com/fxamacker/cbor) library for CBOR encoding and decoding, which provides:
+The processor uses the [fxamacker/cbor/v2](https://github.com/fxamacker/cbor) library for CBOR encoding and decoding, which provides:
 
-- RFC 7049 and RFC 8949 compliant implementation
-- High performance encoding and decoding
-- Support for various CBOR data types
+- RFC 7049 and RFC 8949 compliant implementation.
+- High performance encoding and decoding (updated to `v2.9.2` for hardened indefinite-length data encoding).
+- RFC3339 UTC time encoding with nanosecond precision natively within CBOR (`TimeRFC3339NanoUTC`).
+- Support for various CBOR data types.
+
+### Performance Optimizations
+
+- **Lazy JSON Evaluation**: The `to_json` operator sets the decoded CBOR payload natively as Bento's internal structured message (`msg.SetStructured()`). This enables lazy evaluation, skipping expensive JSON byte allocation and serialization steps entirely if the next processor handles mapped structured queries or structural modifications.
+- **Precision Safety**: The `from_json` processor guarantees that numbers are not incorrectly interpreted as strings inside CBOR payloads by circumventing `json.Number` fallback behaviors.
 
 ## Contributing
 
