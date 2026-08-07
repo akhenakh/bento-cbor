@@ -26,3 +26,7 @@ go.work.sum
 cmd/bento-cbor/bento-cbor
 # Added by goreleaser init:
 dist/
+
+# Local CBOR fixtures used via BENTO_CBOR_FIXTURE — never commit real payloads
+*.cbor
+testdata/fixtures/
